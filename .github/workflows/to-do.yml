@@ -1,5 +1,4 @@
-name: Run To-Do List Tests
-
+name: CI Pipeline - Unit and Performance Tests
 
 on:
   push:
@@ -9,31 +8,47 @@ on:
     branches:
       - main
 
-
 jobs:
-  test:
+  unit-tests:
+    name: Run Unit Tests
     runs-on: ubuntu-latest
 
-
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
-
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
 
-
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install pytest
 
-
-      - name: Run tests
+      - name: Run Pytest
         run: |
           source venv/bin/activate
           pytest -v
+
+  performance-test:
+    name: Run Performance Test with Locust
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Locust
+        run: pip install locust
+
+      - name: Run Locust Load Test
+        run: |
+          locust -f locustfile.py \
+          --headless \
+          -u 100 \
+          -r 10 \
+          -t 10m \
+          --host=https://pwskills.com
